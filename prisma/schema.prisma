@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String   @unique
+  password      String?
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  businessId    String?
+  business      Business? @relation(fields: [businessId], references: [id])
+  memberOf      BusinessMember[]
+}
+
+model Business {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  settings      BusinessSettings?
+  products      Product[]
+  conversations Conversation[]
+  whatsappSession WhatsAppSession?
+  members       BusinessMember[]
+}
+
+model BusinessMember {
+  id            String   @id @default(cuid())
+  userId        String
+  businessId    String
+  role          String   @default("member") // admin, manager, member
+
+  user          User     @relation(fields: [userId], references: [id])
+  business      Business @relation(fields: [businessId], references: [id])
+
+  @@unique([userId, businessId])
+}
+
+model BusinessSettings {
+  id            String   @id @default(cuid())
+  businessId    String   @unique
+  business      Business @relation(fields: [businessId], references: [id])
+
+  openingHours  Json      // { "mon": { "open": "08:00", "close": "18:00", "closed": false }, ... }
+  deliveryZones Json      // Array of { "name": "Zone A", "fee": 5.0, "threshold": 50.0 }
+  policies      String    @db.Text
+  welcomeMessage String   @db.Text
+
+  updatedAt     DateTime @updatedAt
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id])
+
+  name          String
+  description   String    @db.Text
+  price         Decimal   @db.Decimal(10, 2)
+  stock         Int
+  category      String
+  sku           String?
+  imageUrl      String?
+
+  // Note: Embedding is added via raw SQL for pgvector
+  // embedding    Unsupported("vector(768)")?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([businessId])
+}
+
+model Conversation {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id])
+
+  customerId    String   // WhatsApp Phone Number
+  status        String   @default("OPEN") // OPEN, CLOSED
+  messages      Message[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([businessId, customerId])
+}
+
+model Message {
+  id            String   @id @default(cuid())
+  conversationId String
+  conversation  Conversation @relation(fields: [conversationId], references: [id])
+
+  role          String   // 'user' | 'assistant' | 'system'
+  content       String    @db.Text
+  timestamp     DateTime @default(now())
+
+  @@index([conversationId])
+}
+
+model WhatsAppSession {
+  id            String   @id @default(cuid())
+  businessId    String   @unique
+  business      Business @relation(fields: [businessId], references: [id])
+
+  sessionData   Json      // Serialized whatsapp-web.js session
+  status        String    @default("DISCONNECTED") // CONNECTED, DISCONNECTED, INITIALIZING
+  lastSyncedAt  DateTime?
+
+  updatedAt     DateTime @updatedAt
+}
+
+model Order {
+  id            String   @id @default(cuid())
+  businessId    String
+  customerId    String
+  total         Decimal   @db.Decimal(10, 2)
+  status        String    @default("PENDING")
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id])
+
+  productId     String
+  quantity      Int
+  price         Decimal   @db.Decimal(10, 2)
+}
