@@ -1,69 +1,25 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowDownRight, ArrowRight, BarChart3, Check, ChevronRight, CircleHelp, Clock3, MessageCircle, Package, ShieldCheck, Sparkles, Upload, Zap } from "lucide-react";
+
+const features = [
+  { icon: Upload, title: "Your catalogue, ready in minutes", text: "Bring your product list in a CSV. Products, prices and stock stay structured and up to date." },
+  { icon: MessageCircle, title: "Every chat becomes a storefront", text: "Customers discover products, ask about delivery and get useful answers in the conversation they already use." },
+  { icon: ShieldCheck, title: "Answers grounded in your business", text: "Hours, policies and inventory come from your shop data. Hand off to a person whenever you need to." },
+];
 
 export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+  return <main className="landing">
+    <nav className="site-nav"><Link className="brand" href="/"><span className="brand-mark"><MessageCircle size={19}/></span>relay<span className="brand-period">.</span></Link><div className="nav-links"><a href="#how-it-works">How it works</a><a href="#features">Features</a><Link href="/auth/signin">Sign in</Link><Link className="button button-dark nav-cta" href="/auth/signup">Start selling <ArrowRight size={15}/></Link></div></nav>
+    <section className="hero-section">
+      <div className="hero-copy"><div className="eyebrow"><span className="eyebrow-dot"/> YOUR SHOP, IN EVERY CHAT</div><h1>Turn your WhatsApp into an <em>AI-powered</em> storefront.</h1><p className="hero-description">Give every customer a thoughtful answer, a helpful product recommendation, and a clear next step — even when you’re busy.</p><div className="hero-actions"><Link className="button button-green" href="/auth/signup">Build your storefront <ArrowRight size={17}/></Link><a className="text-link" href="#how-it-works">See how it works <ArrowDownRight size={16}/></a></div><div className="hero-proof"><span className="avatar-stack"><i>J</i><i>A</i><i>M</i></span><span>Built for the way people shop in Africa</span></div></div>
+      <div className="hero-art" aria-label="Preview of a customer shopping through WhatsApp"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="float-card float-top"><span className="float-icon mint"><Package size={16}/></span><span><b>Catalogue synced</b><small>48 products · just now</small></span><Check size={15} className="float-check"/></div><div className="chat-window"><div className="chat-head"><div className="shop-avatar">K</div><div><b>Kora Living</b><small><span className="online-dot"/> typically replies instantly</small></div><span className="chat-menu">•••</span></div><div className="chat-body"><div className="day-label">TODAY</div><div className="bubble bubble-customer">Hi! Looking for a table lamp under ₦80,000.<small>10:42 AM</small></div><div className="typing-row"><span className="typing-avatar">K</span><span className="typing-bubble"><i/><i/><i/></span></div><div className="bubble bubble-shop">I found two lovely options for you. The Noma lamp is ₦62,000 and comes in warm white or terracotta.<small>10:42 AM <Check size={11}/></small></div><div className="product-chip"><div className="product-art"><span className="lamp-shade"/><span className="lamp-stem"/><span className="lamp-base"/></div><div><b>Noma Table Lamp</b><small>₦62,000 · In stock</small></div><ChevronRight size={15}/></div><div className="composer"><span>Type a message…</span><span className="send-button"><ArrowRight size={14}/></span></div></div></div><div className="float-card float-bottom"><span className="float-icon lavender"><Sparkles size={16}/></span><span><b>Helpful, not robotic</b><small>Answers from your real shop data</small></span></div><div className="art-spark spark-one">✳</div><div className="art-spark spark-two">✳</div></div>
+      <div className="hero-caption"><span>01 / A BETTER WAY TO SELL</span><span>Powered by your shop knowledge</span></div>
+    </section>
+    <section className="signal-band"><span>MADE FOR CUSTOMER-LED COMMERCE</span><div><span><MessageCircle size={17}/> Conversations</span><i>+</i><span><Package size={17}/> Your catalogue</span><i>+</i><span><Sparkles size={17}/> Helpful AI</span><i>=</i><b>More sales, less busywork</b></div></section>
+    <section id="how-it-works" className="how-section"><div className="section-kicker">SIMPLE BY DESIGN <span>02</span></div><div className="section-heading"><h2>From “hello” to<br/><em>“I’ll take it.”</em></h2><p>Your customers already know where to find you. Relay helps you show up with the right answer, every time.</p></div><div className="flow-grid"><article className="flow-card flow-catalogue"><span className="step-number">01 — IMPORT</span><div className="flow-illustration sheet-illustration"><div className="sheet-top"><span/><span/><span/></div><div className="sheet-row sheet-head"><i>Product</i><i>Price</i><i>Stock</i></div><div className="sheet-row"><i>Noma Lamp</i><i>₦62,000</i><i>24</i></div><div className="sheet-row"><i>Oka Stool</i><i>₦38,500</i><i>12</i></div><div className="sheet-row"><i>Muna Vase</i><i>₦19,000</i><i>36</i></div><span className="sheet-status"><Check size={13}/> 48 products ready</span></div><h3>Bring your shop online</h3><p>Import your products and set up your shop details. No technical setup required.</p></article><article className="flow-card flow-brain"><span className="step-number">02 — PERSONALIZE</span><div className="flow-illustration brain-illustration"><div className="brain-core"><Sparkles size={25}/></div><span className="brain-node node-a"><Clock3 size={15}/> Your hours</span><span className="brain-node node-b"><Package size={15}/> Your products</span><span className="brain-node node-c"><CircleHelp size={15}/> Your policies</span></div><h3>Teach it your business</h3><p>Your AI learns what you sell, where you deliver and when you’re open.</p></article><article className="flow-card flow-chat"><span className="step-number">03 — CONNECT</span><div className="flow-illustration mini-chat"><div className="mini-message">Do you deliver to Wuse 2?</div><div className="mini-reply">Yes! Delivery to Wuse 2 is ₦2,500 and usually takes 1–2 hours.<small><Check size={10}/> 11:08 AM</small></div><div className="mini-message short">Perfect, thank you!</div></div><h3>Let good conversations flow</h3><p>Connect WhatsApp and let the assistant handle the routine questions with care.</p></article></div></section>
+    <section id="features" className="feature-section"><div className="feature-aside"><span className="section-kicker">THE DETAILS THAT MATTER <span>03</span></span><h2>A little more<br/>human. A lot<br/><em>more helpful.</em></h2><Link className="text-link" href="/auth/signup">Explore your workspace <ArrowRight size={15}/></Link></div><div className="feature-list">{features.map(({icon:Icon,title,text}, index)=><article key={title} className="feature-item"><span className="feature-icon"><Icon size={20}/></span><span className="feature-count">0{index+1}</span><div><h3>{title}</h3><p>{text}</p></div><ArrowRight className="feature-arrow" size={17}/></article>)}<div className="feature-note"><BarChart3 size={17}/><span>Everything in one calm, clear workspace.</span></div></div></section>
+    <section className="quote-section"><div className="quote-mark">“</div><blockquote>Great service isn’t about being online all the time. It’s about making every customer feel <em>looked after.</em></blockquote><span className="quote-caption">A BETTER CUSTOMER EXPERIENCE, AT EVERY HOUR</span></section>
+    <section className="final-cta"><div className="cta-orb"/><span className="section-kicker">READY WHEN YOU ARE <span>04</span></span><h2>Let’s make your next<br/>customer conversation count.</h2><p>Start with your catalogue. Your storefront is closer than you think.</p><Link className="button button-light" href="/auth/signup">Create your free workspace <ArrowRight size={16}/></Link><span className="cta-note"><Zap size={13}/> Set up in a few minutes</span></section>
+    <footer className="site-footer"><Link className="brand" href="/"><span className="brand-mark"><MessageCircle size={17}/></span>relay<span className="brand-period">.</span></Link><span>Commerce that feels like a conversation.</span><div><Link href="/auth/signin">Sign in</Link><span>© 2026 Relay</span></div></footer>
+  </main>;
 }

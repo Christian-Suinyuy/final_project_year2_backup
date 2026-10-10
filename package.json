@@ -6,13 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1149.0",
     "@hookform/resolvers": "^5.9.1",
     "@langchain/google-genai": "^2.3.2",
     "@langchain/langgraph": "^1.4.21",
-    "@prisma/client": "^7.10.0",
+    "@prisma/client": "^5.22.0",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
@@ -21,7 +26,7 @@
     "lucide-react": "^1.54.0",
     "next": "16.4.0",
     "next-auth": "^4.24.15",
-    "prisma": "^8.0.0-rc.22",
+    "prisma": "^5.22.0",
     "qrcode": "^1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -35,11 +40,15 @@
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
   }
 }

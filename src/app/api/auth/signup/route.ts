@@ -1,41 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
-
-const signupSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  password: z.string().min(6),
-});
+const signupSchema = z.object({ name: z.string().trim().min(2).max(100), email: z.string().trim().email().max(254), password: z.string().min(8).max(128) });
 
 export async function POST(request: NextRequest) {
+  const input = signupSchema.safeParse(await request.json().catch(() => null));
+  if (!input.success) return NextResponse.json({ message: "Enter your name, a valid email and a password with at least 8 characters." }, { status: 400 });
   try {
-    const body = await request.json();
-    const validatedData = signupSchema.parse(body);
-
-    const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email },
-    });
-
-    if (existingUser) {
-      return NextResponse.json({ message: "User already exists" }, { status: 400 });
-    }
-
-    const hashedPassword = await bcrypt.hash(validatedData.password, 12);
-
-    const user = await prisma.user.create({
-      data: {
-        name: validatedData.name,
-        email: validatedData.email,
-        password: hashedPassword,
-      },
-    });
-
-    return NextResponse.json({ message: "User created successfully", userId: user.id }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message || "Internal server error" }, { status: 500 });
+    const email = input.data.email.toLowerCase();
+    const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    if (existing) return NextResponse.json({ message: "An account with this email already exists. Sign in instead." }, { status: 409 });
+    const password = await bcrypt.hash(input.data.password, 12);
+    const user = await prisma.user.create({ data: { name: input.data.name, email, password }, select: { id: true } });
+    return NextResponse.json({ message: "Account created. Sign in to set up your shop.", userId: user.id }, { status: 201 });
+  } catch (error) {
+    console.error("Account creation failed", error);
+    return NextResponse.json({ message: "We couldn't create your account. Please try again." }, { status: 500 });
   }
 }

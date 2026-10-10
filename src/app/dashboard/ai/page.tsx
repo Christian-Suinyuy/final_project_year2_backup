@@ -1,0 +1,26 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { Bot, Check, LoaderCircle, Save, Sparkles } from "lucide-react";
+
+export default function AssistantPage() {
+  const [name, setName] = useState("Kora");
+  const [tone, setTone] = useState("Warm and helpful");
+  const [instructions, setInstructions] = useState("");
+  const [greeting, setGreeting] = useState("");
+  const [policies, setPolicies] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
+  const load = useCallback(async () => { try { const response = await fetch("/api/business", { cache: "no-store" }); const result = await response.json(); if (!response.ok) throw new Error(result.message); const settings = result.business.settings ?? {}; setName(settings.aiName ?? "Kora"); setTone(settings.aiTone ?? "Warm and helpful"); setInstructions(settings.aiInstructions ?? ""); setGreeting(settings.welcomeMessage ?? ""); setPolicies(settings.policies ?? ""); } catch (e) { setError(e instanceof Error ? e.message : "We couldn't load assistant settings."); } finally { setLoading(false); } }, []);
+  useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer); }, [load]);
+  const save = async () => { setSaving(true); setError(""); setNotice(""); try { const response = await fetch("/api/business", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aiName: name, aiTone: tone, aiInstructions: instructions, welcomeMessage: greeting, policies }) }); const result = await response.json(); if (!response.ok) throw new Error(result.message); setNotice("Assistant preferences saved."); } catch (e) { setError(e instanceof Error ? e.message : "We couldn't save your assistant preferences."); } finally { setSaving(false); } };
+  if (loading) return <div><div className="skeleton" style={{height:25,width:200,marginBottom:12}}/><div className="skeleton" style={{height:180}}/></div>;
+  return <div><div className="page-title-row"><div><div className="eyebrow-small">YOUR CUSTOMER VOICE</div><h1>AI assistant</h1><p>Set the tone, greeting and extra guidance for your customer conversations.</p></div><button className="button button-primary button-sm" onClick={save} disabled={saving}>{saving ? <LoaderCircle size={13} className="animate-spin"/> : notice ? <Check size={13}/> : <Save size={13}/>} {saving ? "Saving…" : notice ? "Saved" : "Save changes"}</button></div>
+    {error && <div className="notice error">{error}</div>}{notice && <div className="notice success">{notice}</div>}
+    <div className="settings-grid"><section className="panel settings-card"><Bot size={17} color="#5a8664"/><h2 style={{marginTop:10}}>Personality</h2><p>The assistant uses this voice when replying on WhatsApp.</p><div className="form-grid"><div className="form-field"><label>Assistant name</label><input className="field" value={name} onChange={(e)=>setName(e.target.value)}/></div><div className="form-field"><label>Tone</label><select className="field" value={tone} onChange={(e)=>setTone(e.target.value)}><option>Warm and helpful</option><option>Friendly and casual</option><option>Clear and professional</option></select></div><div className="form-field full"><label>Extra instructions</label><textarea className="field" rows={5} value={instructions} onChange={(e)=>setInstructions(e.target.value)} placeholder="For example: keep replies brief, recommend the most affordable option first, or ask one question at a time."/></div></div></section><section className="panel settings-card"><Sparkles size={17} color="#5a8664"/><h2 style={{marginTop:10}}>Shop knowledge</h2><p>The assistant grounds product, delivery and hours answers in your settings.</p><div className="notice info">Product price and stock come from your catalogue. Opening hours, delivery zones, payment methods and policies come from shop settings.</div><div className="form-field" style={{marginTop:12}}><label>Greeting for new customers</label><textarea className="field" rows={3} value={greeting} onChange={(e)=>setGreeting(e.target.value)} placeholder="Hello! Thanks for reaching out…"/></div><div className="form-field" style={{marginTop:12}}><label>Policies and ordering rules</label><textarea className="field" rows={4} value={policies} onChange={(e)=>setPolicies(e.target.value)} placeholder="Returns, exchanges, cancellations and pickup information"/></div><Link className="text-link" style={{marginTop:15}} href="/dashboard/settings">Open all shop settings <Check size={12}/></Link></section></div>
+    <section className="panel" style={{marginTop:13}}><div className="panel-head"><div><h2>About AI replies</h2><p>The assistant needs a Google AI Studio API key and a connected WhatsApp number to reply automatically.</p></div><Sparkles size={16} color="#5a8664"/></div><div className="setup-list" style={{display:"flex",gap:18,flexWrap:"wrap"}}><Link className="text-link" href="/dashboard/catalogue">1. Add your products</Link><Link className="text-link" href="/dashboard/whatsapp">2. Connect WhatsApp</Link><Link className="text-link" href="/dashboard/conversations">3. Review customer chats</Link></div></section>
+  </div>;
+}

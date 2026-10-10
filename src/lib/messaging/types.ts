@@ -23,6 +23,7 @@ export enum SessionStatus {
 
 export interface IMessagingAdapter {
   initialize(businessId: string): Promise<void>;
+  requestPairingCode(phoneNumber: string): Promise<string | null>;
   sendMessage(params: OutgoingMessage): Promise<void>;
   onMessage(callback: (msg: IncomingMessage) => void): void;
   getQR(): Promise<string | null>;

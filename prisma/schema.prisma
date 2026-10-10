@@ -8,138 +8,198 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  name          String?
-  email         String   @unique
-  password      String?
-  image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String?
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  businessId    String?
-  business      Business? @relation(fields: [businessId], references: [id])
-  memberOf      BusinessMember[]
+  businessId String?
+  business   Business? @relation(fields: [businessId], references: [id])
+  memberOf   BusinessMember[]
 }
 
 model Business {
-  id            String   @id @default(cuid())
-  name          String
-  email         String   @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String            @id @default(cuid())
+  name            String
+  email           String
+  industry        String            @default("General")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
-  settings      BusinessSettings?
-  products      Product[]
-  conversations Conversation[]
+  settings        BusinessSettings?
+  users           User[]
+  products        Product[]
+  customers       Customer[]
+  orders          Order[]
+  conversations   Conversation[]
   whatsappSession WhatsAppSession?
-  members       BusinessMember[]
+  members         BusinessMember[]
 }
 
 model BusinessMember {
-  id            String   @id @default(cuid())
-  userId        String
-  businessId    String
-  role          String   @default("member") // admin, manager, member
+  id        String  @id @default(cuid())
+  userId    String
+  businessId String
+  role      String  @default("member") // admin, manager, member
 
-  user          User     @relation(fields: [userId], references: [id])
-  business      Business @relation(fields: [businessId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  business Business @relation(fields: [businessId], references: [id])
 
   @@unique([userId, businessId])
 }
 
 model BusinessSettings {
-  id            String   @id @default(cuid())
-  businessId    String   @unique
-  business      Business @relation(fields: [businessId], references: [id])
+  id             String   @id @default(cuid())
+  businessId     String   @unique
+  business       Business @relation(fields: [businessId], references: [id])
 
-  openingHours  Json      // { "mon": { "open": "08:00", "close": "18:00", "closed": false }, ... }
-  deliveryZones Json      // Array of { "name": "Zone A", "fee": 5.0, "threshold": 50.0 }
-  policies      String    @db.Text
+  openingHours   Json
+  deliveryZones  Json
+  policies       String   @db.Text
   welcomeMessage String   @db.Text
+  shopDescription String? @db.Text
+  phone          String?
+  address        String?
+  currency       String   @default("NGN")
+  timezone       String   @default("Africa/Lagos")
+  deliveryEnabled Boolean @default(true)
+  deliveryNotes  String?  @db.Text
+  paymentMethods Json     @default("[]")
+  aiName         String   @default("Kora")
+  aiTone         String   @default("Warm and helpful")
+  aiInstructions String?  @db.Text
 
-  updatedAt     DateTime @updatedAt
+  updatedAt      DateTime @updatedAt
 }
 
 model Product {
-  id            String   @id @default(cuid())
-  businessId    String
-  business      Business @relation(fields: [businessId], references: [id])
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
 
-  name          String
-  description   String    @db.Text
-  price         Decimal   @db.Decimal(10, 2)
-  stock         Int
-  category      String
-  sku           String?
-  imageUrl      String?
+  name        String
+  description String   @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int
+  category    String
+  brand       String?
+  sku         String?
+  imageUrl    String?
+  active      Boolean  @default(true)
+  currency    String   @default("NGN")
+  attributes  Json     @default("{}")
+  variants    ProductVariant[]
+  orderItems  OrderItem[]
 
-  // Note: Embedding is added via raw SQL for pgvector
-  // embedding    Unsupported("vector(768)")?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  @@index([businessId, active])
+  @@unique([businessId, sku])
+}
 
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  sku       String?
+  price     Decimal? @db.Decimal(10, 2)
+  stock     Int      @default(0)
+  attributes Json    @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model Customer {
+  id          String        @id @default(cuid())
+  businessId  String
+  business    Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  phone       String
+  name        String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  conversations Conversation[]
+  orders       Order[]
+
+  @@unique([businessId, phone])
   @@index([businessId])
 }
 
 model Conversation {
-  id            String   @id @default(cuid())
-  businessId    String
-  business      Business @relation(fields: [businessId], references: [id])
+  id              String    @id @default(cuid())
+  businessId      String
+  business        Business  @relation(fields: [businessId], references: [id])
 
-  customerId    String   // WhatsApp Phone Number
-  status        String   @default("OPEN") // OPEN, CLOSED
-  messages      Message[]
+  customerId      String
+  customerRecordId String?
+  customer        Customer? @relation(fields: [customerRecordId], references: [id])
+  intent          String?
+  context         Json      @default("{}")
+  status          String    @default("OPEN")
+  messages        Message[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([businessId, customerId])
 }
 
 model Message {
-  id            String   @id @default(cuid())
+  id            String       @id @default(cuid())
   conversationId String
   conversation  Conversation @relation(fields: [conversationId], references: [id])
 
-  role          String   // 'user' | 'assistant' | 'system'
-  content       String    @db.Text
-  timestamp     DateTime @default(now())
+  role          String
+  content       String       @db.Text
+  timestamp     DateTime     @default(now())
 
   @@index([conversationId])
+  @@index([conversationId, timestamp])
 }
 
 model WhatsAppSession {
-  id            String   @id @default(cuid())
-  businessId    String   @unique
-  business      Business @relation(fields: [businessId], references: [id])
+  id           String    @id @default(cuid())
+  businessId   String    @unique
+  business     Business  @relation(fields: [businessId], references: [id])
 
-  sessionData   Json      // Serialized whatsapp-web.js session
-  status        String    @default("DISCONNECTED") // CONNECTED, DISCONNECTED, INITIALIZING
-  lastSyncedAt  DateTime?
+  sessionData  Json?
+  status       String    @default("DISCONNECTED")
+  phoneNumber  String?
+  lastError    String?
+  lastSyncedAt DateTime?
 
-  updatedAt     DateTime @updatedAt
+  updatedAt    DateTime  @updatedAt
 }
 
 model Order {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   businessId    String
+  business      Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   customerId    String
+  customerRecordId String?
+  customer      Customer? @relation(fields: [customerRecordId], references: [id])
   total         Decimal   @db.Decimal(10, 2)
   status        String    @default("PENDING")
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   items         OrderItem[]
 }
 
 model OrderItem {
-  id            String   @id @default(cuid())
-  orderId       String
-  order         Order    @relation(fields: [orderId], references: [id])
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
 
-  productId     String
-  quantity      Int
-  price         Decimal   @db.Decimal(10, 2)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
 }
